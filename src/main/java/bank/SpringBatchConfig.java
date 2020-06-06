@@ -80,6 +80,8 @@ public class SpringBatchConfig {
         };
     }
 
+    @Autowired
+    private BankTransactionRepo bankTransactionRepo;
     @Bean
     public ItemWriter<BankTransaction> writer(){
         return new ItemWriter<BankTransaction>() {
@@ -87,6 +89,7 @@ public class SpringBatchConfig {
             public void write(List<? extends BankTransaction> list) throws Exception {
                 System.out.println("writer.....");
                 list.forEach(System.out::println);
+                bankTransactionRepo.saveAll(list);
             }
         };
     }
