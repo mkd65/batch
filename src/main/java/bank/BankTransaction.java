@@ -12,6 +12,7 @@ import java.util.Date;
 
 @Entity
 @Data @NoArgsConstructor @AllArgsConstructor @ToString
+//entity 2
 public class BankTransaction {
     @Id
 private long id;
