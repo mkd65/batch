@@ -1,0 +1,6 @@
+bank\BankBatchApplication.class
+bank\BankTransactionRepo.class
+bank\SpringBatchConfig.class
+bank\JobRestController.class
+bank\SpringBatchConfig$1.class
+bank\BankTransaction.class

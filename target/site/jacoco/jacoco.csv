@@ -1,0 +1,6 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+bankBatch,bank,BankBatchApplication,8,0,0,0,3,0,2,0,2,0
+bankBatch,bank,BankTransaction,285,0,36,0,7,0,36,0,18,0
+bankBatch,bank,SpringBatchConfig.new ItemWriter() {...},23,0,0,0,5,0,2,0,2,0
+bankBatch,bank,JobRestController,38,0,2,0,8,0,3,0,2,0
+bankBatch,bank,SpringBatchConfig,118,0,0,0,29,0,7,0,7,0

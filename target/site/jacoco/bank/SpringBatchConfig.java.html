@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpringBatchConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">bankBatch</a> &gt; <a href="index.source.html" class="el_package">bank</a> &gt; <span class="el_source">SpringBatchConfig.java</span></div><h1>SpringBatchConfig.java</h1><pre class="source lang-java linenums">package bank;
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.*;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.LineMapper;
+import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+@Configuration
+@EnableBatchProcessing
+public class SpringBatchConfig {
+    @Autowired
+    private JobBuilderFactory jobs;
+    @Autowired
+    private StepBuilderFactory steps;
+    @Autowired
+    private ItemReader&lt;BankTransaction&gt; itemReader;
+    @Autowired
+    private ItemProcessor&lt;BankTransaction,BankTransaction&gt; itemProcessor;
+    @Autowired
+    private ItemWriter&lt;BankTransaction&gt; itemWriter;
+
+<span class="nc" id="L37">    public SpringBatchConfig(){</span>
+<span class="nc" id="L38">    }</span>
+
+    @Bean
+    public Job bankJob(){
+<span class="nc" id="L42">        Step step = steps.get(&quot;bankStep&quot;)</span>
+<span class="nc" id="L43">                .&lt;BankTransaction,BankTransaction&gt;chunk(10)</span>
+<span class="nc" id="L44">                .reader(itemReader)</span>
+<span class="nc" id="L45">                .processor(itemProcessor)</span>
+<span class="nc" id="L46">                .writer(itemWriter)</span>
+<span class="nc" id="L47">                .build();</span>
+<span class="nc" id="L48">        return  jobs.get(&quot;bankJob&quot;).start(step).build();</span>
+    }
+
+    @Bean
+    public FlatFileItemReader&lt;BankTransaction&gt; flatFileItemReader(@Value(&quot;${inputFile}&quot;) Resource resource){
+<span class="nc" id="L53">        FlatFileItemReader&lt;BankTransaction&gt; bankTransactionFlatFileItemReader= new FlatFileItemReader&lt;&gt;();</span>
+<span class="nc" id="L54">        bankTransactionFlatFileItemReader.setName(&quot;FFIR&quot;);</span>
+<span class="nc" id="L55">        bankTransactionFlatFileItemReader.setLinesToSkip(1);</span>
+<span class="nc" id="L56">        bankTransactionFlatFileItemReader.setResource(resource);</span>
+<span class="nc" id="L57">        bankTransactionFlatFileItemReader.setStrict(false);</span>
+<span class="nc" id="L58">        bankTransactionFlatFileItemReader.setLineMapper(lineMapper());</span>
+<span class="nc" id="L59">        return bankTransactionFlatFileItemReader;</span>
+
+    }
+@Bean
+    public LineMapper&lt;BankTransaction&gt; lineMapper() {
+<span class="nc" id="L64">        DefaultLineMapper&lt;BankTransaction&gt; lineMapper= new DefaultLineMapper&lt;&gt;();</span>
+<span class="nc" id="L65">        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();</span>
+<span class="nc" id="L66">        lineTokenizer.setDelimiter(&quot;,&quot;);</span>
+<span class="nc" id="L67">        lineTokenizer.setNames(&quot;id&quot;,&quot;accountId&quot;,&quot;strTransacionDate&quot;,&quot;transType&quot;,&quot;amount&quot;);</span>
+<span class="nc" id="L68">        lineMapper.setLineTokenizer(lineTokenizer);</span>
+<span class="nc" id="L69">        BeanWrapperFieldSetMapper&lt;BankTransaction&gt;fieldSetMapper=new BeanWrapperFieldSetMapper&lt;&gt;();</span>
+<span class="nc" id="L70">        fieldSetMapper.setTargetType(BankTransaction.class);</span>
+<span class="nc" id="L71">        lineMapper.setFieldSetMapper(fieldSetMapper);</span>
+<span class="nc" id="L72">        return lineMapper;</span>
+    }
+
+    @Bean
+    public ItemProcessor&lt;BankTransaction,BankTransaction&gt; process(){
+<span class="nc" id="L77">        return bankTransaction -&gt; {</span>
+<span class="nc" id="L78">            bankTransaction.setTransDate(new SimpleDateFormat(&quot;dd/MM/yyyy-HH:mm&quot;).parse(bankTransaction.getStrTransacionDate()));</span>
+<span class="nc" id="L79">            return bankTransaction;</span>
+        };
+    }
+
+    @Autowired
+    private BankTransactionRepo bankTransactionRepo;
+    @Bean
+    public ItemWriter&lt;BankTransaction&gt; writer(){
+<span class="nc" id="L87">        return new ItemWriter&lt;BankTransaction&gt;() {</span>
+            @Override
+            public void write(List&lt;? extends BankTransaction&gt; list) throws Exception {
+<span class="nc" id="L90">                System.out.println(&quot;writer.....&quot;);</span>
+<span class="nc" id="L91">                list.forEach(System.out::println);</span>
+<span class="nc" id="L92">                bankTransactionRepo.saveAll(list);</span>
+<span class="nc" id="L93">            }</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
