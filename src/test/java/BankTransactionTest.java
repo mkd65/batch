@@ -13,4 +13,9 @@ public class BankTransactionTest {
         assertEquals(message,"Hello World");
     }
 
+    @Test
+    public void testPrintMessage2() {
+        assertEquals(message,"Hello WorldE");
+    }
+
 }
